@@ -12,7 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath; 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,5 +49,17 @@ public class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(productId)); 
         verify(productService, times(1)).getProductById(productId);
+    }
+
+        @Test
+        void createProductTestController() throws Exception {
+        ProductDTO productToCreate = new ProductDTO(null, "Producto Creado", "Desc Creado", 300L, 50L);
+        ProductDTO createdProductFromService = new ProductDTO(2L, "Producto Creado", "Desc Creado", 300L, 50L);
+        when(productService.createProduct(productToCreate)).thenReturn(createdProductFromService);
+        mockMvc.perform(post("/api/product") // <--- Ruta POST para crear producto
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(productToCreate))) // <--- Envía el DTO como JSON en el cuerpo
+                .andDo(print())
+                .andExpect(status().isCreated());
     }
 }

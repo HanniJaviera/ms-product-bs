@@ -39,4 +39,18 @@ public class ProductServiceTest {
         assertEquals(test.getNombreProduct(), actualProduct.getNombreProduct());
         verify(productdbFeignClient, times(1)).findProductById(productId);
     }
+
+        @Test
+        void createProductTest() {
+        ProductDTO productToCreate = new ProductDTO(null, "Nuevo Producto", "Descripción Nuevo", 200L, 10L);
+        ProductDTO createdProductFromClient = new ProductDTO(1L, "Nuevo Producto", "Descripción Nuevo", 200L, 10L);
+        when(productdbFeignClient.createProduct(productToCreate)).thenReturn(createdProductFromClient);
+        ProductDTO actualCreatedProduct = productService.createProduct(productToCreate);
+        assertNotNull(actualCreatedProduct);
+        assertNotNull(actualCreatedProduct.getId());
+        assertEquals(createdProductFromClient.getId(), actualCreatedProduct.getId());
+        assertEquals(productToCreate.getNombreProduct(), actualCreatedProduct.getNombreProduct());
+        assertEquals(productToCreate.getDescripcion(), actualCreatedProduct.getDescripcion());
+        verify(productdbFeignClient, times(1)).createProduct(productToCreate);
+    }
 }
