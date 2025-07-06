@@ -6,6 +6,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -39,8 +43,8 @@ public class ProductControllerTest {
         mockMvc = standaloneSetup(productController).build();
     }
 
-    @Test
-    void getProductByIdTest() throws Exception {
+        @Test
+        void getProductByIdTest() throws Exception {
         Long productId = 100L;
         ProductDTO testProduct = new ProductDTO(productId, "Test Nombre", "Test Descripción", 100L, 0L);
         when(productService.getProductById(productId)).thenReturn(testProduct);
@@ -61,5 +65,24 @@ public class ProductControllerTest {
                 .content(objectMapper.writeValueAsString(productToCreate))) // <--- Envía el DTO como JSON en el cuerpo
                 .andDo(print())
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void selectAllProductTestController() throws Exception {
+        ProductDTO product1 = new ProductDTO(1L, "Producto 1", "Desc 1", 100L, 5L);
+        ProductDTO product2 = new ProductDTO(2L, "Producto 2", "Desc 2", 200L, 10L);
+        List<ProductDTO> mockProductList = Arrays.asList(product1, product2);
+        when(productService.selectAllProduct()).thenReturn(mockProductList);
+        mockMvc.perform(get("/api/product") 
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
+                .andDo(print()) 
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray()) 
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(product1.getId()))
+                .andExpect(jsonPath("$[0].nombreProduct").value(product1.getNombreProduct())); 
+
+
+        verify(productService, times(1)).selectAllProduct();
     }
 }

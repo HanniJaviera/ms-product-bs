@@ -1,10 +1,14 @@
 package cl.duoc.ms_product_bs.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +32,8 @@ public class ProductServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void getProductByIdTest(){
+        @Test
+        void getProductByIdTest(){
         Long productId = 100L; //ID de producto que definimos
         ProductDTO test = new ProductDTO(productId, "Test", "Test Descripción", 100L, 0L);
         when(productdbFeignClient.findProductById(productId)).thenReturn(ResponseEntity.ok(test));
@@ -52,5 +56,20 @@ public class ProductServiceTest {
         assertEquals(productToCreate.getNombreProduct(), actualCreatedProduct.getNombreProduct());
         assertEquals(productToCreate.getDescripcion(), actualCreatedProduct.getDescripcion());
         verify(productdbFeignClient, times(1)).createProduct(productToCreate);
+    }
+
+    @Test
+    void selectAllProductTest() {
+        ProductDTO product1 = new ProductDTO(1L, "Producto A", "Desc A", 100L, 5L);
+        ProductDTO product2 = new ProductDTO(2L, "Producto B", "Desc B", 200L, 10L);
+        List<ProductDTO> mockProductList = Arrays.asList(product1, product2);
+        when(productdbFeignClient.selectAllProduct()).thenReturn(mockProductList);
+        List<ProductDTO> actualProductList = productService.selectAllProduct();
+        assertNotNull(actualProductList);
+        assertFalse(actualProductList.isEmpty());
+        assertEquals(2, actualProductList.size());
+        assertEquals(product1.getId(), actualProductList.get(0).getId());
+        assertEquals(product1.getNombreProduct(), actualProductList.get(0).getNombreProduct());
+        verify(productdbFeignClient, times(1)).selectAllProduct();
     }
 }
